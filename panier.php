@@ -71,6 +71,7 @@ require_once 'includes/header.php';
             </div>
         <?php else: ?>
             <form method="POST">
+                <div class="cart-table-wrap">
                 <table class="cart-table">
                     <thead>
                         <tr>

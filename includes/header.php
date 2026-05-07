@@ -16,7 +16,12 @@ $page_courante = basename($_SERVER['PHP_SELF']);
 
 <nav class="navbar">
     <a class="nav-brand" href="index.php">🍺 Solem Exire</a>
-    <ul class="nav-links">
+
+    <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+
+    <ul class="nav-links" id="navLinks">
         <li><a href="index.php" <?= $page_courante === 'index.php' ? 'class="active"' : '' ?>>Accueil</a></li>
         <li><a href="produits.php" <?= $page_courante === 'produits.php' ? 'class="active"' : '' ?>>Nos Bières</a></li>
         <?php if (isset($_SESSION['compte_id'])): ?>
@@ -29,3 +34,23 @@ $page_courante = basename($_SERVER['PHP_SELF']);
         <?php endif; ?>
     </ul>
 </nav>
+
+<script>
+(function () {
+    var btn   = document.getElementById('navToggle');
+    var menu  = document.getElementById('navLinks');
+    btn.addEventListener('click', function () {
+        var open = menu.classList.toggle('open');
+        btn.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', open);
+    });
+    // Fermer le menu si on clique sur un lien
+    menu.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () {
+            menu.classList.remove('open');
+            btn.classList.remove('open');
+            btn.setAttribute('aria-expanded', false);
+        });
+    });
+})();
+</script>
