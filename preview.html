@@ -289,7 +289,7 @@ footer::before{content:'';position:absolute;top:0;left:50%;transform:translateX(
       <p class="card-text">Ambre sombre aux premières notes de fruits confits et de cire d'abeille. La gorge révèle une amertume douce, presque philosophique, avant une finale longue et minérale.</p>
       <div class="card-tags">
         <span class="tag">Ambré sombre</span>
-        <span class="tag">Fruity</span>
+        <span class="tag">Fruité</span>
         <span class="tag">Minéral</span>
       </div>
     </div>
@@ -467,12 +467,24 @@ footer::before{content:'';position:absolute;top:0;left:50%;transform:translateX(
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
+<!-- Fallback si CDN bloqués -->
 <script>
-gsap.registerPlugin(ScrollTrigger);
+function _showAll(){
+  ['#hEyebrow','#hTitle','#hSub','#hCta','#scrollInd'].forEach(function(s){
+    var el=document.querySelector(s);if(el){el.style.opacity='1';el.style.transform='none';}
+  });
+  document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(function(el){el.classList.add('visible');});
+  ['#sigEye','#sigDesc','#sigBtn','#sigLineT','#sigLineB'].forEach(function(s){var el=document.querySelector(s);if(el)el.style.opacity='1';});
+  document.querySelectorAll('#sigTitle .word span').forEach(function(el){el.style.transform='none';});
+  document.querySelectorAll('.biere-card,.g-item').forEach(function(el){el.style.opacity='1';el.style.transform='none';});
+}
+window.addEventListener('load',function(){if(!window.gsap||!window.ScrollTrigger)_showAll();});
+</script>
 
-/* ============================================================
-   CURSOR
-============================================================ */
+<script>
+if(window.gsap&&window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+
+/* CURSOR */
 const cur = document.getElementById('cur');
 const curRing = document.getElementById('curRing');
 let mx=0,my=0,rx=0,ry=0;
@@ -487,9 +499,7 @@ document.querySelectorAll('a,.biere-card,.g-item,.nav-cta,.hero-cta,.sig-btn').f
   el.addEventListener('mouseleave',()=>curRing.classList.remove('active'));
 });
 
-/* ============================================================
-   FLOATING PARTICLES
-============================================================ */
+/* FLOATING PARTICLES */
 function makeParticles(containerId,count){
   const c=document.getElementById(containerId);
   if(!c)return;
@@ -497,302 +507,156 @@ function makeParticles(containerId,count){
     const p=document.createElement('div');
     p.className='p';
     const size=Math.random()*3+1;
-    p.style.cssText=`
-      left:${Math.random()*100}%;
-      width:${size}px;height:${size}px;
-      animation-duration:${10+Math.random()*20}s;
-      animation-delay:-${Math.random()*20}s;
-      opacity:${Math.random()*.5};
-    `;
+    p.style.cssText=`left:${Math.random()*100}%;width:${size}px;height:${size}px;animation-duration:${10+Math.random()*20}s;animation-delay:-${Math.random()*20}s;opacity:${Math.random()*.5};`;
     c.appendChild(p);
   }
 }
 makeParticles('heroParticles',40);
 makeParticles('sigParticles',25);
 
-/* ============================================================
-   NAV SCROLL
-============================================================ */
-ScrollTrigger.create({
+/* NAV SCROLL */
+if(window.ScrollTrigger) ScrollTrigger.create({
   start:'top -80',
   onEnter:()=>document.getElementById('nav').classList.add('scrolled'),
   onLeaveBack:()=>document.getElementById('nav').classList.remove('scrolled'),
 });
 
-/* ============================================================
-   HERO ANIMATIONS (on load)
-============================================================ */
-const heroTl = gsap.timeline({delay:.3});
-heroTl
-  .to('#hEyebrow',{opacity:1,y:0,duration:1,ease:'power3.out'})
-  .to('#hTitle',{opacity:1,y:0,duration:1.2,ease:'power3.out'},'-=.5')
-  .to('#hSub',{opacity:1,y:0,duration:1,ease:'power3.out'},'-=.7')
-  .to('#hCta',{opacity:1,y:0,duration:.8,ease:'power3.out'},'-=.5')
-  .to('#scrollInd',{opacity:1,duration:.8},'-=.3');
+/* HERO ANIMATIONS */
+if(window.gsap){
+  const heroTl=gsap.timeline({delay:.3});
+  heroTl
+    .to('#hEyebrow',{opacity:1,y:0,duration:1,ease:'power3.out'})
+    .to('#hTitle',{opacity:1,y:0,duration:1.2,ease:'power3.out'},'-=.5')
+    .to('#hSub',{opacity:1,y:0,duration:1,ease:'power3.out'},'-=.7')
+    .to('#hCta',{opacity:1,y:0,duration:.8,ease:'power3.out'},'-=.5')
+    .to('#scrollInd',{opacity:1,duration:.8},'-=.3');
+} else { _showAll(); }
 
-/* ============================================================
-   THREE.JS — HERO 3D BOTTLE
-============================================================ */
-(function initThree(){
+/* THREE.JS — BOUTEILLE 3D */
+if(!window.THREE){document.getElementById('threeCanvas').style.display='none';}
+window.THREE&&(function initThree(){
   const canvas=document.getElementById('threeCanvas');
-  const w=canvas.offsetWidth;
-  const h=canvas.offsetHeight;
-
+  const w=canvas.offsetWidth,h=canvas.offsetHeight;
   const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.setSize(w,h);
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure=1.2;
   renderer.shadowMap.enabled=true;
-
   const scene=new THREE.Scene();
   scene.fog=new THREE.FogExp2(0x070509,.08);
-
   const camera=new THREE.PerspectiveCamera(40,w/h,.1,100);
   camera.position.set(3.5,0,6);
   camera.lookAt(0,0,0);
-
-  /* -- LIGHTS -- */
   scene.add(new THREE.AmbientLight(0x1a1228,.8));
-
   const warmL=new THREE.PointLight(0xc8860a,4,20);
-  warmL.position.set(3,3,4);
-  scene.add(warmL);
-
+  warmL.position.set(3,3,4);scene.add(warmL);
   const coolL=new THREE.PointLight(0x2d5a9e,2,20);
-  coolL.position.set(-4,2,-3);
-  scene.add(coolL);
-
+  coolL.position.set(-4,2,-3);scene.add(coolL);
   const fireL=new THREE.PointLight(0xff4400,3,12);
-  fireL.position.set(1,-3,3);
-  scene.add(fireL);
-
+  fireL.position.set(1,-3,3);scene.add(fireL);
   const rimL=new THREE.PointLight(0xb87333,2,15);
-  rimL.position.set(-2,-1,2);
-  scene.add(rimL);
-
-  /* -- BOTTLE SHAPE (LatheGeometry) -- */
+  rimL.position.set(-2,-1,2);scene.add(rimL);
   const pts=[
-    new THREE.Vector2(.0,.00),
-    new THREE.Vector2(.50,.00),
-    new THREE.Vector2(.55,.08),
-    new THREE.Vector2(.60,.3),
-    new THREE.Vector2(.64,.8),
-    new THREE.Vector2(.66,1.6),
-    new THREE.Vector2(.66,2.8),
-    new THREE.Vector2(.63,3.4),
-    new THREE.Vector2(.56,3.9),
-    new THREE.Vector2(.38,4.5),
-    new THREE.Vector2(.22,5.0),
-    new THREE.Vector2(.20,5.8),
-    new THREE.Vector2(.22,6.0),
-    new THREE.Vector2(.22,6.15),
+    new THREE.Vector2(.0,.00),new THREE.Vector2(.50,.00),new THREE.Vector2(.55,.08),
+    new THREE.Vector2(.60,.3),new THREE.Vector2(.64,.8),new THREE.Vector2(.66,1.6),
+    new THREE.Vector2(.66,2.8),new THREE.Vector2(.63,3.4),new THREE.Vector2(.56,3.9),
+    new THREE.Vector2(.38,4.5),new THREE.Vector2(.22,5.0),new THREE.Vector2(.20,5.8),
+    new THREE.Vector2(.22,6.0),new THREE.Vector2(.22,6.15),
   ];
-
   const bottleGroup=new THREE.Group();
-
-  /* Outer glass */
-  const glassGeo=new THREE.LatheGeometry(pts,96);
-  const glassMat=new THREE.MeshPhysicalMaterial({
-    color:0x0a0500,
-    roughness:.05,
-    metalness:.05,
-    reflectivity:.9,
-    clearcoat:1.0,
-    clearcoatRoughness:.02,
-    transparent:true,
-    opacity:.92,
-  });
-  const glass=new THREE.Mesh(glassGeo,glassMat);
-  bottleGroup.add(glass);
-
-  /* Inner liquid */
+  const glassMat=new THREE.MeshPhysicalMaterial({color:0x0a0500,roughness:.05,metalness:.05,reflectivity:.9,clearcoat:1.0,clearcoatRoughness:.02,transparent:true,opacity:.92});
+  bottleGroup.add(new THREE.Mesh(new THREE.LatheGeometry(pts,96),glassMat));
   const liqPts=pts.map(p=>new THREE.Vector2(p.x*.85,p.y));
-  const liqGeo=new THREE.LatheGeometry(liqPts,64);
-  const liqMat=new THREE.MeshStandardMaterial({
-    color:0x7a3800,
-    roughness:.0,
-    metalness:.0,
-    transparent:true,
-    opacity:.85,
-    emissive:0x3d1800,
-    emissiveIntensity:.4,
-  });
-  bottleGroup.add(new THREE.Mesh(liqGeo,liqMat));
-
-  /* Label */
+  const liqMat=new THREE.MeshStandardMaterial({color:0x7a3800,roughness:.0,metalness:.0,transparent:true,opacity:.85,emissive:0x3d1800,emissiveIntensity:.4});
+  bottleGroup.add(new THREE.Mesh(new THREE.LatheGeometry(liqPts,64),liqMat));
   const lblCanvas=document.createElement('canvas');
   lblCanvas.width=512;lblCanvas.height=220;
   const lc=lblCanvas.getContext('2d');
-  lc.fillStyle='#0a0500';
-  lc.fillRect(0,0,512,220);
-  lc.strokeStyle='rgba(200,134,10,.4)';
-  lc.lineWidth=1;
-  lc.strokeRect(12,12,488,196);
-  lc.strokeRect(20,20,472,180);
-  lc.fillStyle='rgba(200,134,10,.06)';
-  lc.fillRect(20,20,472,180);
-  lc.fillStyle='#c8860a';
-  lc.font='bold 52px Georgia,serif';
-  lc.textAlign='center';
-  lc.letterSpacing='8px';
+  lc.fillStyle='#0a0500';lc.fillRect(0,0,512,220);
+  lc.strokeStyle='rgba(200,134,10,.4)';lc.lineWidth=1;
+  lc.strokeRect(12,12,488,196);lc.strokeRect(20,20,472,180);
+  lc.fillStyle='rgba(200,134,10,.06)';lc.fillRect(20,20,472,180);
+  lc.fillStyle='#c8860a';lc.font='bold 52px Georgia,serif';lc.textAlign='center';lc.letterSpacing='8px';
   lc.fillText('SOLEM EXIRE',256,95);
-  lc.fillStyle='rgba(200,134,10,.5)';
-  lc.fillRect(80,110,352,1);
-  lc.fillStyle='rgba(200,134,10,.7)';
-  lc.font='16px Georgia,serif';
+  lc.fillStyle='rgba(200,134,10,.5)';lc.fillRect(80,110,352,1);
+  lc.fillStyle='rgba(200,134,10,.7)';lc.font='16px Georgia,serif';
   lc.fillText('BIÈRE ARTISANALE — 1689',256,140);
-  lc.fillStyle='rgba(200,134,10,.4)';
-  lc.font='12px Georgia,serif';
+  lc.fillStyle='rgba(200,134,10,.4)';lc.font='12px Georgia,serif';
   lc.fillText('6.8% ALC. VOL. · 750 ML',256,170);
   const lblTex=new THREE.CanvasTexture(lblCanvas);
-  const lblGeo=new THREE.CylinderGeometry(.64,.64,1.2,64,1,true,-Math.PI*.7,Math.PI*1.4);
-  const lblMat=new THREE.MeshStandardMaterial({map:lblTex,transparent:true,roughness:.3,metalness:.1,side:THREE.FrontSide});
-  const lbl=new THREE.Mesh(lblGeo,lblMat);
-  lbl.position.y=1.5;
-  bottleGroup.add(lbl);
-
-  /* Cap */
-  const capGeo=new THREE.CylinderGeometry(.24,.22,.12,32);
-  const capMat=new THREE.MeshStandardMaterial({color:0xc8860a,roughness:.1,metalness:.8});
-  const cap=new THREE.Mesh(capGeo,capMat);
-  cap.position.y=6.21;
-  bottleGroup.add(cap);
-
-  /* Glow sphere behind bottle */
-  const glowGeo=new THREE.SphereGeometry(1.5,32,32);
+  const lbl=new THREE.Mesh(new THREE.CylinderGeometry(.64,.64,1.2,64,1,true,-Math.PI*.7,Math.PI*1.4),new THREE.MeshStandardMaterial({map:lblTex,transparent:true,roughness:.3,metalness:.1,side:THREE.FrontSide}));
+  lbl.position.y=1.5;bottleGroup.add(lbl);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(.24,.22,.12,32),new THREE.MeshStandardMaterial({color:0xc8860a,roughness:.1,metalness:.8}));
+  cap.position.y=6.21;bottleGroup.add(cap);
   const glowMat=new THREE.MeshBasicMaterial({color:0xc8860a,transparent:true,opacity:.04});
-  const glow=new THREE.Mesh(glowGeo,glowMat);
-  glow.position.set(0,3,-.5);
-  scene.add(glow);
-
-  bottleGroup.position.set(0,-3,0);
-  bottleGroup.rotation.y=.3;
-  scene.add(bottleGroup);
-
-  /* -- PARTICLES -- */
-  const pCount=600;
-  const pPos=new Float32Array(pCount*3);
-  for(let i=0;i<pCount;i++){
-    pPos[i*3]=(Math.random()-.5)*14;
-    pPos[i*3+1]=(Math.random()-.5)*14;
-    pPos[i*3+2]=(Math.random()-.5)*8;
-  }
+  const glow=new THREE.Mesh(new THREE.SphereGeometry(1.5,32,32),glowMat);
+  glow.position.set(0,3,-.5);scene.add(glow);
+  bottleGroup.position.set(0,-3,0);bottleGroup.rotation.y=.3;scene.add(bottleGroup);
+  const pCount=600,pPos=new Float32Array(pCount*3);
+  for(let i=0;i<pCount;i++){pPos[i*3]=(Math.random()-.5)*14;pPos[i*3+1]=(Math.random()-.5)*14;pPos[i*3+2]=(Math.random()-.5)*8;}
   const pGeo=new THREE.BufferGeometry();
   pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
-  const pMat=new THREE.PointsMaterial({color:0xc8860a,size:.03,transparent:true,opacity:.35});
-  const particles=new THREE.Points(pGeo,pMat);
+  const particles=new THREE.Points(pGeo,new THREE.PointsMaterial({color:0xc8860a,size:.03,transparent:true,opacity:.35}));
   scene.add(particles);
-
-  /* -- MOUSE PARALLAX -- */
   let targetRX=0,targetRY=0;
   document.addEventListener('mousemove',e=>{
-    const nx=(e.clientX/window.innerWidth-.5)*2;
-    const ny=(e.clientY/window.innerHeight-.5)*2;
-    targetRX=ny*.08;
-    targetRY=nx*.12;
+    targetRX=(e.clientY/window.innerHeight-.5)*2*.08;
+    targetRY=(e.clientX/window.innerWidth-.5)*2*.12;
   });
-
-  /* -- GSAP BOTTLE INTRO -- */
-  gsap.from(bottleGroup.position,{y:-6,duration:2.5,ease:'power4.out',delay:.5});
-  gsap.from(bottleGroup.rotation,{y:-1,duration:2.5,ease:'power4.out',delay:.5});
-  gsap.to(bottleGroup,{duration:0}); // keep ref
-
-  /* -- SCROLL: fade canvas -- */
-  gsap.to('#threeCanvas',{
-    opacity:0,
-    scrollTrigger:{trigger:'#histoire',start:'top 80%',end:'top top',scrub:1}
-  });
-
-  /* -- RESIZE -- */
+  if(window.gsap){
+    gsap.from(bottleGroup.position,{y:-6,duration:2.5,ease:'power4.out',delay:.5});
+    gsap.from(bottleGroup.rotation,{y:-1,duration:2.5,ease:'power4.out',delay:.5});
+    gsap.to('#threeCanvas',{opacity:0,scrollTrigger:{trigger:'#histoire',start:'top 80%',end:'top top',scrub:1}});
+  }
   window.addEventListener('resize',()=>{
     const nw=canvas.offsetWidth,nh=canvas.offsetHeight;
-    camera.aspect=nw/nh;camera.updateProjectionMatrix();
-    renderer.setSize(nw,nh);
+    camera.aspect=nw/nh;camera.updateProjectionMatrix();renderer.setSize(nw,nh);
   });
-
-  /* -- LOOP -- */
   const clock=new THREE.Clock();
   (function loop(){
     requestAnimationFrame(loop);
     const t=clock.getElapsedTime();
     bottleGroup.rotation.y+=.004;
     bottleGroup.rotation.x+=(targetRX-bottleGroup.rotation.x)*.05;
-    particles.rotation.y+=.0004;
-    particles.rotation.x=Math.sin(t*.1)*.05;
+    particles.rotation.y+=.0004;particles.rotation.x=Math.sin(t*.1)*.05;
     warmL.intensity=3.5+Math.sin(t*1.5)*.5;
     fireL.intensity=2.5+Math.sin(t*2.3+1)*.5;
     glow.material.opacity=.03+Math.sin(t*.8)*.015;
     renderer.render(scene,camera);
   })();
-})();
+})());
 
-/* ============================================================
-   SCROLL REVEAL — IntersectionObserver
-============================================================ */
+/* SCROLL REVEAL */
 const revealObs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(e.isIntersecting){
-      setTimeout(()=>e.target.classList.add('visible'),
-        (parseFloat(e.target.style.transitionDelay)||0)*1000);
+      setTimeout(()=>e.target.classList.add('visible'),(parseFloat(e.target.style.transitionDelay)||0)*1000);
       revealObs.unobserve(e.target);
     }
   });
 },{threshold:.15});
 document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(el=>revealObs.observe(el));
 
-/* ============================================================
-   SIGNATURE ANIMATION
-============================================================ */
-ScrollTrigger.create({
-  trigger:'#signature',
-  start:'top 70%',
-  once:true,
-  onEnter:()=>{
-    const tl=gsap.timeline();
-    tl.to('#sigLineT,#sigLineB',{opacity:1,duration:1,ease:'power2.out'})
-      .to('#sigEye',{opacity:1,duration:.8,ease:'power3.out'},'-=.5')
-      .to('#sigTitle .word span',{y:0,duration:1.2,stagger:.12,ease:'power4.out'},'-=.3')
-      .to('#sigDesc',{opacity:1,duration:.8,ease:'power3.out'},'-=.4')
-      .to('#sigBtn',{opacity:1,duration:.8,ease:'power3.out'},'-=.3');
-  }
-});
-
-/* ============================================================
-   GSAP HISTOIRE PARALLAX
-============================================================ */
-gsap.to('.histoire-year',{
-  y:-60,
-  scrollTrigger:{trigger:'#histoire',start:'top bottom',end:'bottom top',scrub:2}
-});
-
-/* ============================================================
-   CARDS STAGGER
-============================================================ */
-ScrollTrigger.create({
-  trigger:'.biere-cards',
-  start:'top 80%',
-  once:true,
-  onEnter:()=>{
-    gsap.from('.biere-card',{
-      y:60,opacity:0,duration:1,stagger:.15,ease:'power3.out'
-    });
-  }
-});
-
-/* ============================================================
-   GALLERY REVEAL
-============================================================ */
-ScrollTrigger.create({
-  trigger:'.gallery-grid',
-  start:'top 80%',
-  once:true,
-  onEnter:()=>{
-    gsap.from('.g-item',{
-      y:40,opacity:0,duration:1,stagger:.08,ease:'power3.out'
-    });
-  }
-});
+/* GSAP ANIMATIONS AU SCROLL */
+if(window.gsap&&window.ScrollTrigger){
+  ScrollTrigger.create({
+    trigger:'#signature',start:'top 70%',once:true,
+    onEnter:()=>{
+      const tl=gsap.timeline();
+      tl.to('#sigLineT,#sigLineB',{opacity:1,duration:1,ease:'power2.out'})
+        .to('#sigEye',{opacity:1,duration:.8,ease:'power3.out'},'-=.5')
+        .to('#sigTitle .word span',{y:0,duration:1.2,stagger:.12,ease:'power4.out'},'-=.3')
+        .to('#sigDesc',{opacity:1,duration:.8,ease:'power3.out'},'-=.4')
+        .to('#sigBtn',{opacity:1,duration:.8,ease:'power3.out'},'-=.3');
+    }
+  });
+  gsap.to('.histoire-year',{y:-60,scrollTrigger:{trigger:'#histoire',start:'top bottom',end:'bottom top',scrub:2}});
+  ScrollTrigger.create({trigger:'.biere-cards',start:'top 80%',once:true,
+    onEnter:()=>gsap.from('.biere-card',{y:60,opacity:0,duration:1,stagger:.15,ease:'power3.out'})});
+  ScrollTrigger.create({trigger:'.gallery-grid',start:'top 80%',once:true,
+    onEnter:()=>gsap.from('.g-item',{y:40,opacity:0,duration:1,stagger:.08,ease:'power3.out'})});
+}
 </script>
 </body>
 </html>
