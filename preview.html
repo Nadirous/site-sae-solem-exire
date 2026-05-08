@@ -474,7 +474,20 @@ footer::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
 <script>
-gsap.registerPlugin(ScrollTrigger);
+function _showAll(){
+  ['#hEyebrow','#hTitle','#hSub','#hCta','#scrollInd'].forEach(function(s){
+    var el=document.querySelector(s);if(el){el.style.opacity='1';el.style.transform='none';}
+  });
+  document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(function(el){el.classList.add('visible');});
+  ['#sigEye','#sigDesc','#sigBtn','#sigLineT','#sigLineB'].forEach(function(s){var el=document.querySelector(s);if(el)el.style.opacity='1';});
+  document.querySelectorAll('#sigTitle .word span').forEach(function(el){el.style.transform='none';el.parentElement.style.opacity='1';});
+  document.querySelectorAll('.biere-card,.g-item').forEach(function(el){el.style.opacity='1';el.style.transform='none';});
+}
+window.addEventListener('load',function(){if(!window.gsap||!window.ScrollTrigger)_showAll();});
+</script>
+
+<script>
+if(window.gsap&&window.ScrollTrigger)gsap.registerPlugin(ScrollTrigger);
 
 /* ============================================================
    CURSOR
@@ -519,15 +532,18 @@ makeParticles('sigParticles',25);
 /* ============================================================
    NAV SCROLL
 ============================================================ */
+if(window.gsap&&window.ScrollTrigger){
 ScrollTrigger.create({
   start:'top -80',
   onEnter:()=>document.getElementById('nav').classList.add('scrolled'),
   onLeaveBack:()=>document.getElementById('nav').classList.remove('scrolled'),
 });
+}
 
 /* ============================================================
    HERO ANIMATIONS (on load)
 ============================================================ */
+if(window.gsap){
 const heroTl = gsap.timeline({delay:.3});
 heroTl
   .to('#hEyebrow',{opacity:1,y:0,duration:1,ease:'power3.out'})
@@ -535,10 +551,12 @@ heroTl
   .to('#hSub',{opacity:1,y:0,duration:1,ease:'power3.out'},'-=.7')
   .to('#hCta',{opacity:1,y:0,duration:.8,ease:'power3.out'},'-=.5')
   .to('#scrollInd',{opacity:1,duration:.8},'-=.3');
+}else{_showAll();}
 
 /* ============================================================
    THREE.JS — HERO 3D BOTTLE
 ============================================================ */
+if(window.THREE){
 (function initThree(){
   const canvas=document.getElementById('threeCanvas');
   const w=canvas.offsetWidth;
@@ -700,15 +718,17 @@ heroTl
   });
 
   /* -- GSAP BOTTLE INTRO -- */
-  gsap.from(bottleGroup.position,{y:-6,duration:2.5,ease:'power4.out',delay:.5});
-  gsap.from(bottleGroup.rotation,{y:-1,duration:2.5,ease:'power4.out',delay:.5});
-  gsap.to(bottleGroup,{duration:0}); // keep ref
-
-  /* -- SCROLL: fade canvas -- */
-  gsap.to('#threeCanvas',{
-    opacity:0,
-    scrollTrigger:{trigger:'#histoire',start:'top 80%',end:'top top',scrub:1}
-  });
+  if(window.gsap){
+    gsap.from(bottleGroup.position,{y:-6,duration:2.5,ease:'power4.out',delay:.5});
+    gsap.from(bottleGroup.rotation,{y:-1,duration:2.5,ease:'power4.out',delay:.5});
+    gsap.to(bottleGroup,{duration:0});
+    if(window.ScrollTrigger){
+      gsap.to('#threeCanvas',{
+        opacity:0,
+        scrollTrigger:{trigger:'#histoire',start:'top 80%',end:'top top',scrub:1}
+      });
+    }
+  }
 
   /* -- RESIZE -- */
   window.addEventListener('resize',()=>{
@@ -732,6 +752,7 @@ heroTl
     renderer.render(scene,camera);
   })();
 })();
+}else{document.getElementById('threeCanvas').style.display='none';}
 
 /* ============================================================
    SCROLL REVEAL — IntersectionObserver
@@ -750,6 +771,7 @@ document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').fo
 /* ============================================================
    SIGNATURE ANIMATION
 ============================================================ */
+if(window.gsap&&window.ScrollTrigger){
 ScrollTrigger.create({
   trigger:'#signature',
   start:'top 70%',
@@ -799,6 +821,7 @@ ScrollTrigger.create({
     });
   }
 });
+}
 </script>
 </body>
 </html>
