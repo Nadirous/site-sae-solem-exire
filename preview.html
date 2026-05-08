@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOLEM EXIRE — Une bière née des profondeurs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070509;
+  --bg2:#0d0a18;
+  --bg3:#120800;
+  --gold:#c8860a;
+  --gold-l:#f0b030;
+  --copper:#b87333;
+  --fire:#ff6b35;
+  --text:#f0e6d3;
+  --muted:#7a6f60;
+  --purple:#1e1228;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Cormorant Garamond',serif;overflow-x:hidden;cursor:none}
+a{color:inherit;text-decoration:none}
+
+/* CURSOR */
+.cur{position:fixed;width:8px;height:8px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s,background .2s}
+.cur-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(200,134,10,.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .18s ease}
+.cur-ring.active{transform:translate(-50%,-50%) scale(1.6);border-color:var(--gold);opacity:.5}
+
+/* NOISE */
+.noise{position:fixed;inset:0;z-index:9997;pointer-events:none;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:200px}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.8rem 3rem;display:flex;align-items:center;justify-content:space-between;transition:background .6s,backdrop-filter .6s}
+nav.scrolled{background:rgba(7,5,9,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(200,134,10,.1)}
+.nav-brand{font-family:'Cinzel Decorative',serif;font-size:1.1rem;letter-spacing:4px;color:var(--gold);text-shadow:0 0 20px rgba(200,134,10,.4)}
+.nav-links{display:flex;gap:3rem;list-style:none}
+.nav-links a{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);transition:color .3s}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;padding:.6rem 1.5rem;border:1px solid rgba(200,134,10,.4);color:var(--gold);border-radius:2px;transition:all .3s}
+.nav-cta:hover{background:var(--gold);color:#000;box-shadow:0 0 20px rgba(200,134,10,.3)}
+
+/* HERO */
+#hero{position:relative;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:flex-start}
+#threeCanvas{position:absolute;inset:0;width:100%;height:100%}
+.hero-gradient{position:absolute;inset:0;background:radial-gradient(ellipse at 70% 50%,transparent 30%,rgba(7,5,9,.6) 70%),linear-gradient(to right,rgba(7,5,9,.9) 35%,transparent 65%)}
+.hero-content{position:relative;z-index:2;padding:0 6vw;max-width:700px}
+.hero-eyebrow{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:5px;text-transform:uppercase;color:var(--copper);margin-bottom:2rem;opacity:0;transform:translateY(20px)}
+.hero-title{font-family:'Cinzel Decorative',serif;font-size:clamp(3.5rem,7vw,6.5rem);font-weight:400;line-height:1;letter-spacing:6px;color:var(--text);margin-bottom:1.5rem;opacity:0;transform:translateY(40px)}
+.hero-title span{color:var(--gold);text-shadow:0 0 60px rgba(200,134,10,.5),0 0 120px rgba(200,134,10,.2)}
+.hero-sub{font-family:'Cormorant Garamond',serif;font-size:clamp(1.2rem,2.5vw,1.6rem);font-style:italic;font-weight:300;color:rgba(240,230,211,.7);margin-bottom:3rem;line-height:1.6;opacity:0;transform:translateY(30px)}
+.hero-cta{display:inline-flex;align-items:center;gap:1rem;font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:3px;text-transform:uppercase;padding:.9rem 2.5rem;background:linear-gradient(135deg,rgba(200,134,10,.15),rgba(184,115,51,.1));border:1px solid rgba(200,134,10,.5);color:var(--gold-l);border-radius:2px;position:relative;overflow:hidden;transition:all .4s;opacity:0;transform:translateY(30px)}
+.hero-cta::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--gold),var(--copper));opacity:0;transition:opacity .4s}
+.hero-cta:hover::before{opacity:1}
+.hero-cta:hover{color:#000;box-shadow:0 0 40px rgba(200,134,10,.4)}
+.hero-cta span{position:relative;z-index:1}
+.hero-cta .arrow{position:relative;z-index:1;transition:transform .3s}
+.hero-cta:hover .arrow{transform:translateX(6px)}
+.scroll-indicator{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:.8rem;opacity:0}
+.scroll-indicator span{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+.scroll-line{width:1px;height:50px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scrollPulse 2s ease-in-out infinite}
+@keyframes scrollPulse{0%,100%{opacity:.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.2)}}
+
+/* SECTIONS COMMON */
+section{position:relative;overflow:hidden}
+.section-label{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:5px;text-transform:uppercase;color:var(--copper);display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem}
+.section-label::before{content:'';flex:0 0 40px;height:1px;background:var(--copper)}
+.section-title{font-family:'Cinzel',serif;font-size:clamp(2rem,4vw,3.5rem);font-weight:400;letter-spacing:2px;line-height:1.1;margin-bottom:1.5rem}
+.section-title em{color:var(--gold);font-style:normal}
+
+/* HISTOIRE */
+#histoire{min-height:100vh;background:linear-gradient(135deg,var(--bg) 0%,var(--purple) 50%,var(--bg3) 100%);display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:8rem 6vw}
+.histoire-visual{position:relative}
+.histoire-year{font-family:'Cinzel Decorative',serif;font-size:clamp(6rem,12vw,11rem);font-weight:900;color:transparent;-webkit-text-stroke:1px rgba(200,134,10,.2);line-height:1;letter-spacing:-2px;position:relative}
+.histoire-year::after{content:'1689';position:absolute;inset:0;color:transparent;-webkit-text-stroke:1px rgba(200,134,10,.08);transform:translate(4px,4px)}
+.histoire-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:300px;background:radial-gradient(circle,rgba(200,134,10,.15) 0%,transparent 70%);pointer-events:none;animation:glowPulse 4s ease-in-out infinite}
+@keyframes glowPulse{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
+.histoire-text{padding-left:4vw}
+.histoire-text p{font-size:1.1rem;line-height:1.9;color:rgba(240,230,211,.7);font-style:italic;font-weight:300;margin-bottom:1.5rem}
+.histoire-text p strong{color:var(--gold);font-style:normal;font-weight:400}
+.histoire-line{width:60px;height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:2rem 0}
+.histoire-quote{font-family:'Cinzel Decorative',serif;font-size:.95rem;color:var(--copper);letter-spacing:2px;font-style:italic}
+
+/* BIÈRE */
+#biere{min-height:100vh;background:var(--bg);padding:8rem 6vw;display:flex;flex-direction:column;align-items:center}
+#biere .section-header{text-align:center;margin-bottom:5rem;max-width:600px}
+.biere-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1200px;width:100%}
+.biere-card{position:relative;padding:2.5rem;background:rgba(255,255,255,.02);border:1px solid rgba(200,134,10,.1);border-radius:4px;overflow:hidden;transition:all .5s cubic-bezier(.23,1,.32,1);backdrop-filter:blur(10px)}
+.biere-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,134,10,.05) 0%,transparent 60%);opacity:0;transition:opacity .5s}
+.biere-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .4s}
+.biere-card:hover{transform:translateY(-8px);border-color:rgba(200,134,10,.3);box-shadow:0 30px 60px rgba(0,0,0,.5),0 0 60px rgba(200,134,10,.08)}
+.biere-card:hover::before,.biere-card:hover::after{opacity:1}
+.card-num{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:4px;color:var(--copper);margin-bottom:2rem;display:flex;align-items:center;gap:1rem}
+.card-num::after{content:'';flex:1;height:1px;background:rgba(200,134,10,.2)}
+.card-icon{font-size:1.8rem;margin-bottom:1.5rem;display:block}
+.card-title{font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:2px;margin-bottom:1rem;color:var(--gold-l)}
+.card-text{font-size:.95rem;line-height:1.8;color:var(--muted);font-style:italic}
+.card-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.5rem}
+.tag{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:2px;text-transform:uppercase;padding:.3rem .8rem;border:1px solid rgba(200,134,10,.2);color:var(--copper);border-radius:2px}
+
+/* EXPÉRIENCE */
+#experience{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;padding:8rem 4vw;overflow:hidden}
+.exp-bg{position:absolute;inset:0;background:radial-gradient(ellipse at center,var(--bg3) 0%,var(--bg) 50%,var(--purple) 100%)}
+.exp-orbs{position:absolute;inset:0;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orbFloat 8s ease-in-out infinite}
+.orb1{width:400px;height:400px;background:rgba(200,134,10,.06);top:-10%;left:-10%;animation-delay:0s}
+.orb2{width:300px;height:300px;background:rgba(255,107,53,.05);bottom:-5%;right:-5%;animation-delay:-3s}
+.orb3{width:250px;height:250px;background:rgba(30,18,40,.8);top:40%;left:40%;animation-delay:-6s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0)}33%{transform:translate(30px,-20px)}66%{transform:translate(-20px,30px)}}
+.exp-content{position:relative;z-index:1;max-width:900px}
+.exp-pre{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:6px;text-transform:uppercase;color:var(--copper);margin-bottom:2rem}
+.exp-title{font-family:'Cinzel',serif;font-size:clamp(2.5rem,5vw,4.5rem);font-weight:300;line-height:1.2;margin-bottom:2rem}
+.exp-title strong{display:block;color:var(--gold);font-weight:600;letter-spacing:3px;text-shadow:0 0 40px rgba(200,134,10,.4)}
+.exp-desc{font-size:1.1rem;line-height:1.9;color:rgba(240,230,211,.6);font-style:italic;max-width:600px;margin:0 auto 3rem}
+.exp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(200,134,10,.1);border:1px solid rgba(200,134,10,.1);max-width:700px;margin:0 auto}
+.exp-item{background:var(--bg);padding:1.5rem 1rem;text-align:center}
+.exp-item .num{font-family:'Cinzel Decorative',serif;font-size:1.5rem;color:var(--gold);display:block;margin-bottom:.3rem}
+.exp-item .label{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+
+/* GALERIE */
+#galerie{padding:8rem 6vw;background:var(--bg2)}
+#galerie .section-header{margin-bottom:4rem}
+.gallery-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(2,280px);gap:8px;max-width:1400px}
+.g-item{position:relative;overflow:hidden;border-radius:2px;cursor:none}
+.g-item:nth-child(1){grid-column:span 5}
+.g-item:nth-child(2){grid-column:span 4}
+.g-item:nth-child(3){grid-column:span 3}
+.g-item:nth-child(4){grid-column:span 3}
+.g-item:nth-child(5){grid-column:span 5}
+.g-item:nth-child(6){grid-column:span 4}
+.g-img{position:absolute;inset:0;transition:transform .8s cubic-bezier(.23,1,.32,1)}
+.g-item:hover .g-img{transform:scale(1.08)}
+.g-item:nth-child(1) .g-img{background:linear-gradient(135deg,#0a0400,#3d1500 40%,#8b4513 70%,#c8860a)}
+.g-item:nth-child(2) .g-img{background:radial-gradient(ellipse at 30% 70%,#ff6b35 0%,#4a1000 40%,#0a0400 100%)}
+.g-item:nth-child(3) .g-img{background:linear-gradient(to bottom,#1e1228,#0d0a18,#070509)}
+.g-item:nth-child(4) .g-img{background:radial-gradient(ellipse at center,#c8860a 0%,#4a2000 30%,#0a0400 100%)}
+.g-item:nth-child(5) .g-img{background:linear-gradient(160deg,#0d0a18,#2d1b4e 50%,#1a0800)}
+.g-item:nth-child(6) .g-img{background:linear-gradient(to right,#070509,#1a0e02,#3d2000)}
+.g-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(7,5,9,.9) 0%,transparent 50%);opacity:0;transition:opacity .5s}
+.g-item:hover .g-overlay{opacity:1}
+.g-label{position:absolute;bottom:1.5rem;left:1.5rem;font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--text);opacity:0;transform:translateY(10px);transition:all .4s}
+.g-item:hover .g-label{opacity:1;transform:translateY(0)}
+.g-tag{position:absolute;top:1rem;right:1rem;font-family:'Cinzel',serif;font-size:.5rem;letter-spacing:2px;text-transform:uppercase;padding:.3rem .6rem;background:rgba(200,134,10,.2);border:1px solid rgba(200,134,10,.3);color:var(--gold);border-radius:2px;opacity:0;transition:opacity .4s .1s}
+.g-item:hover .g-tag{opacity:1}
+
+/* SIGNATURE */
+#signature{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;background:var(--bg);padding:4rem}
+.sig-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(200,134,10,.04) 0%,transparent 60%)}
+.sig-line-top,.sig-line-bot{position:absolute;left:50%;transform:translateX(-50%);width:1px;background:linear-gradient(to bottom,transparent,rgba(200,134,10,.3),transparent);opacity:0}
+.sig-line-top{top:0;height:30vh}
+.sig-line-bot{bottom:0;height:30vh}
+.sig-content{position:relative;z-index:1}
+.sig-eyebrow{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:6px;text-transform:uppercase;color:var(--copper);margin-bottom:3rem;opacity:0}
+.sig-title{font-family:'Cinzel Decorative',serif;font-size:clamp(2.5rem,6vw,5.5rem);font-weight:400;line-height:1.1;color:var(--text);opacity:0}
+.sig-title .word{display:inline-block;overflow:hidden;margin:0 .2em}
+.sig-title .word span{display:inline-block;transform:translateY(110%)}
+.sig-accent{color:var(--gold);text-shadow:0 0 60px rgba(200,134,10,.5)}
+.sig-desc{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-style:italic;color:var(--muted);margin-top:2rem;opacity:0;letter-spacing:1px}
+.sig-btn{display:inline-flex;align-items:center;gap:1rem;margin-top:3rem;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:4px;text-transform:uppercase;padding:1rem 3rem;border:1px solid rgba(200,134,10,.4);color:var(--gold);position:relative;overflow:hidden;transition:all .4s;opacity:0}
+.sig-btn::before{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.23,1,.32,1)}
+.sig-btn:hover::before{transform:scaleX(1)}
+.sig-btn:hover{color:#000;border-color:var(--gold)}
+.sig-btn span{position:relative;z-index:1}
+
+/* FOOTER */
+footer{background:var(--bg);border-top:1px solid rgba(200,134,10,.1);padding:5rem 6vw 3rem;position:relative}
+footer::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:300px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.footer-inner{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;margin-bottom:4rem}
+.footer-brand{font-family:'Cinzel Decorative',serif;font-size:1.2rem;letter-spacing:4px;color:var(--gold);margin-bottom:1rem;text-shadow:0 0 20px rgba(200,134,10,.3)}
+.footer-tagline{font-style:italic;font-size:.9rem;color:var(--muted);line-height:1.7}
+.footer-col h4{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:4px;text-transform:uppercase;color:var(--copper);margin-bottom:1.5rem}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:.8rem}
+.footer-col ul a{font-size:.85rem;color:var(--muted);transition:color .3s;letter-spacing:.5px}
+.footer-col ul a:hover{color:var(--gold)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:2rem;border-top:1px solid rgba(255,255,255,.05)}
+.footer-copy{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.footer-warning{font-size:.7rem;font-style:italic;color:rgba(122,111,96,.5)}
+
+/* REVEAL CLASSES */
+.reveal{opacity:0;transform:translateY(50px);transition:opacity 1s ease,transform 1s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-50px);transition:opacity 1s ease,transform 1s ease}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(50px);transition:opacity 1s ease,transform 1s ease}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+.reveal-scale{opacity:0;transform:scale(0.9);transition:opacity 1s ease,transform 1s ease}
+.reveal-scale.visible{opacity:1;transform:scale(1)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:1.2rem 1.5rem}
+  .nav-links{display:none}
+  #histoire{grid-template-columns:1fr;padding:6rem 1.5rem;gap:3rem}
+  .histoire-text{padding-left:0}
+  .histoire-year{font-size:5rem}
+  .biere-cards{grid-template-columns:1fr;max-width:400px}
+  .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .g-item{grid-column:span 1!important}
+  .exp-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-inner{grid-template-columns:1fr 1fr;gap:2rem}
+  .hero-content{padding:0 1.5rem}
+}
+@media(max-width:600px){
+  .biere-cards{grid-template-columns:1fr}
+  .gallery-grid{grid-template-columns:1fr}
+  .footer-inner{grid-template-columns:1fr}
+  .sig-title{font-size:2rem}
+  #experience{padding:6rem 1.5rem}
+}
+
+/* FLOATING PARTICLES CSS */
+.particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.p{position:absolute;width:2px;height:2px;background:var(--gold);border-radius:50%;opacity:0;animation:particleFloat linear infinite}
+@keyframes particleFloat{0%{opacity:0;transform:translateY(100vh) translateX(0)}10%{opacity:.6}90%{opacity:.3}100%{opacity:0;transform:translateY(-10vh) translateX(50px)}}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cur" id="cur"></div>
+<div class="cur-ring" id="curRing"></div>
+
+<!-- Noise -->
+<div class="noise"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <span class="nav-brand">SOLEM EXIRE</span>
+  <ul class="nav-links">
+    <li><a href="#histoire">L'Histoire</a></li>
+    <li><a href="#biere">La Bière</a></li>
+    <li><a href="#galerie">Galerie</a></li>
+  </ul>
+  <a href="#experience" class="nav-cta">Commander</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="threeCanvas"></canvas>
+  <div class="hero-gradient"></div>
+  <div class="particles" id="heroParticles"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow" id="hEyebrow">Brasserie Artisanale · Fondée en 1689</div>
+    <h1 class="hero-title" id="hTitle">SOLEM<br><span>EXIRE</span></h1>
+    <p class="hero-sub" id="hSub">Une bière née des profondeurs.</p>
+    <a href="#histoire" class="hero-cta" id="hCta">
+      <span>Découvrir l'expérience</span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+  <div class="scroll-indicator" id="scrollInd">
+    <span>Défiler</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- HISTOIRE -->
+<section id="histoire">
+  <div class="histoire-visual reveal-left">
+    <div class="histoire-glow"></div>
+    <div class="histoire-year">1689</div>
+  </div>
+  <div class="histoire-text reveal-right">
+    <div class="section-label">Notre Origine</div>
+    <h2 class="section-title">Une légende<br>née <em>dans l'obscurité</em></h2>
+    <div class="histoire-line"></div>
+    <p>Au crépuscule du XVII<sup>e</sup> siècle, sur des rivages que les cartes refusaient de nommer, <strong>un maître brasseur</strong> mit au point une recette que les siècles n'ont jamais révélée.</p>
+    <p>L'eau venait de sources souterraines. Le houblon, de terres non cartographiées. La fermentation durait <strong>quarante nuits</strong>, jamais une de moins.</p>
+    <p>Ce n'était pas une bière. C'était une <strong>promesse faite à l'obscurité</strong>.</p>
+    <div class="histoire-quote">"Là où le soleil s'éteint, la bière commence."</div>
+  </div>
+</section>
+
+<!-- LA BIÈRE -->
+<section id="biere">
+  <div class="section-header reveal">
+    <div class="section-label" style="justify-content:center">Composition</div>
+    <h2 class="section-title">L'architecture<br>d'un grand <em>cru</em></h2>
+    <p style="font-style:italic;color:var(--muted);max-width:500px;margin:0 auto;line-height:1.8">Chaque détail a été pensé. Chaque choix, justifié. Rien n'est laissé au hasard dans ce qui prétend à l'exception.</p>
+  </div>
+  <div class="biere-cards">
+    <div class="biere-card reveal" style="transition-delay:.1s">
+      <div class="card-num">01</div>
+      <span class="card-icon">◈</span>
+      <div class="card-title">Profil Aromatique</div>
+      <p class="card-text">Ambre sombre aux premières notes de fruits confits et de cire d'abeille. La gorge révèle une amertume douce, presque philosophique, avant une finale longue et minérale.</p>
+      <div class="card-tags">
+        <span class="tag">Ambré sombre</span>
+        <span class="tag">Fruité</span>
+        <span class="tag">Minéral</span>
+      </div>
+    </div>
+    <div class="biere-card reveal" style="transition-delay:.2s">
+      <div class="card-num">02</div>
+      <span class="card-icon">◉</span>
+      <div class="card-title">Ingrédients Rares</div>
+      <p class="card-text">Malt d'orge à six rangs torréfié en fût de chêne. Houblon Bramling Cross en fleurs séchées. Levure de cave ancestrale, préservée depuis trois siècles. Eau de source granitique.</p>
+      <div class="card-tags">
+        <span class="tag">Malt de chêne</span>
+        <span class="tag">Houblon floral</span>
+        <span class="tag">Levure ancestrale</span>
+      </div>
+    </div>
+    <div class="biere-card reveal" style="transition-delay:.3s">
+      <div class="card-num">03</div>
+      <span class="card-icon">◇</span>
+      <div class="card-title">Fabrication Artisanale</div>
+      <p class="card-text">Brassée en petits volumes. Fermentation lente en cuve ouverte de cuivre. Refermentation en bouteille. Garde minimale de quarante-deux jours avant toute commercialisation.</p>
+      <div class="card-tags">
+        <span class="tag">Cuve cuivre</span>
+        <span class="tag">Refermentation</span>
+        <span class="tag">42 jours</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPÉRIENCE SENSORIELLE -->
+<section id="experience">
+  <div class="exp-bg"></div>
+  <div class="exp-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+  <div class="exp-content">
+    <p class="exp-pre reveal">— L'expérience —</p>
+    <h2 class="exp-title reveal" style="transition-delay:.1s">
+      Cinq sens.<br>
+      <strong>Un seul moment.</strong>
+    </h2>
+    <p class="exp-desc reveal" style="transition-delay:.2s">
+      Une bière ne se boit pas. Elle se traverse. Solem Exire est conçue pour transformer chaque gorgée en souvenir.
+    </p>
+    <div class="exp-grid reveal" style="transition-delay:.3s">
+      <div class="exp-item">
+        <span class="num">7°</span>
+        <span class="label">Idéale</span>
+      </div>
+      <div class="exp-item">
+        <span class="num">6.8%</span>
+        <span class="label">Alcool</span>
+      </div>
+      <div class="exp-item">
+        <span class="num">42</span>
+        <span class="label">Jours</span>
+      </div>
+      <div class="exp-item">
+        <span class="num">750<small style="font-size:.7em">ml</small></span>
+        <span class="label">Volume</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALERIE -->
+<section id="galerie" style="padding:8rem 6vw">
+  <div class="section-header" style="margin-bottom:4rem">
+    <div class="section-label">Galerie</div>
+    <h2 class="section-title reveal">La beauté<br>du <em>détail</em></h2>
+  </div>
+  <div class="gallery-grid reveal">
+    <div class="g-item">
+      <div class="g-img"></div>
+      <div class="g-overlay"></div>
+      <div class="g-label">La Bouteille</div>
+      <div class="g-tag">Signature</div>
+    </div>
+    <div class="g-item">
+      <div class="g-img"></div>
+      <div class="g-overlay"></div>
+      <div class="g-label">Le Feu</div>
+      <div class="g-tag">Ambiance</div>
+    </div>
+    <div class="g-item">
+      <div class="g-img"></div>
+      <div class="g-overlay"></div>
+      <div class="g-label">La Nuit</div>
+      <div class="g-tag">Mystère</div>
+    </div>
+    <div class="g-item">
+      <div class="g-img"></div>
+      <div class="g-overlay"></div>
+      <div class="g-label">L'Or</div>
+      <div class="g-tag">Précieux</div>
+    </div>
+    <div class="g-item">
+      <div class="g-img"></div>
+      <div class="g-overlay"></div>
+      <div class="g-label">Les Profondeurs</div>
+      <div class="g-tag">Origine</div>
+    </div>
+    <div class="g-item">
+      <div class="g-img"></div>
+      <div class="g-overlay"></div>
+      <div class="g-label">L'Ombre</div>
+      <div class="g-tag">Premium</div>
+    </div>
+  </div>
+</section>
+
+<!-- SIGNATURE -->
+<section id="signature">
+  <div class="sig-bg"></div>
+  <div class="sig-line-top" id="sigLineT"></div>
+  <div class="sig-line-bot" id="sigLineB"></div>
+  <div class="particles" id="sigParticles"></div>
+  <div class="sig-content">
+    <p class="sig-eyebrow" id="sigEye">— SOLEM EXIRE —</p>
+    <h2 class="sig-title" id="sigTitle">
+      <span class="word"><span>Le</span></span>
+      <span class="word"><span>goût</span></span>
+      <span class="word"><span>de</span></span>
+      <br>
+      <span class="word"><span class="sig-accent">l'aventure.</span></span>
+    </h2>
+    <p class="sig-desc" id="sigDesc">Une bière ne se boit pas. Elle s'explore.</p>
+    <a href="#" class="sig-btn" id="sigBtn"><span>Commander</span> <span>→</span></a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">SOLEM EXIRE</div>
+      <p class="footer-tagline">Une bière née des profondeurs.<br>Brassée avec exigence depuis 1689.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="#histoire">L'Histoire</a></li>
+        <li><a href="#biere">La Bière</a></li>
+        <li><a href="#experience">L'Expérience</a></li>
+        <li><a href="#galerie">Galerie</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>La Marque</h4>
+      <ul>
+        <li><a href="#">Notre Mission</a></li>
+        <li><a href="#">Processus</a></li>
+        <li><a href="#">Éditions limitées</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="#">contact@solem-exire.fr</a></li>
+        <li><a href="#">Presse</a></li>
+        <li><a href="#">Partenariats</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 Solem Exire. Tous droits réservés.</span>
+    <span class="footer-warning">L'abus d'alcool est dangereux pour la santé. À consommer avec modération.</span>
+  </div>
+</footer>
+
+<!-- THREE.JS -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ============================================================
+   CURSOR
+============================================================ */
+const cur = document.getElementById('cur');
+const curRing = document.getElementById('curRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function animCur(){
+  rx+=(mx-rx)*.12;ry+=(my-ry)*.12;
+  curRing.style.left=rx+'px';curRing.style.top=ry+'px';
+  requestAnimationFrame(animCur);
+})();
+document.querySelectorAll('a,.biere-card,.g-item,.nav-cta,.hero-cta,.sig-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>curRing.classList.add('active'));
+  el.addEventListener('mouseleave',()=>curRing.classList.remove('active'));
+});
+
+/* ============================================================
+   FLOATING PARTICLES
+============================================================ */
+function makeParticles(containerId,count){
+  const c=document.getElementById(containerId);
+  if(!c)return;
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div');
+    p.className='p';
+    const size=Math.random()*3+1;
+    p.style.cssText=`
+      left:${Math.random()*100}%;
+      width:${size}px;height:${size}px;
+      animation-duration:${10+Math.random()*20}s;
+      animation-delay:-${Math.random()*20}s;
+      opacity:${Math.random()*.5};
+    `;
+    c.appendChild(p);
+  }
+}
+makeParticles('heroParticles',40);
+makeParticles('sigParticles',25);
+
+/* ============================================================
+   NAV SCROLL
+============================================================ */
+ScrollTrigger.create({
+  start:'top -80',
+  onEnter:()=>document.getElementById('nav').classList.add('scrolled'),
+  onLeaveBack:()=>document.getElementById('nav').classList.remove('scrolled'),
+});
+
+/* ============================================================
+   HERO ANIMATIONS (on load)
+============================================================ */
+const heroTl = gsap.timeline({delay:.3});
+heroTl
+  .to('#hEyebrow',{opacity:1,y:0,duration:1,ease:'power3.out'})
+  .to('#hTitle',{opacity:1,y:0,duration:1.2,ease:'power3.out'},'-=.5')
+  .to('#hSub',{opacity:1,y:0,duration:1,ease:'power3.out'},'-=.7')
+  .to('#hCta',{opacity:1,y:0,duration:.8,ease:'power3.out'},'-=.5')
+  .to('#scrollInd',{opacity:1,duration:.8},'-=.3');
+
+/* ============================================================
+   THREE.JS — HERO 3D BOTTLE
+============================================================ */
+(function initThree(){
+  const canvas=document.getElementById('threeCanvas');
+  const w=canvas.offsetWidth;
+  const h=canvas.offsetHeight;
+
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(w,h);
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.2;
+  renderer.shadowMap.enabled=true;
+
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x070509,.08);
+
+  const camera=new THREE.PerspectiveCamera(40,w/h,.1,100);
+  camera.position.set(3.5,0,6);
+  camera.lookAt(0,0,0);
+
+  /* -- LIGHTS -- */
+  scene.add(new THREE.AmbientLight(0x1a1228,.8));
+
+  const warmL=new THREE.PointLight(0xc8860a,4,20);
+  warmL.position.set(3,3,4);
+  scene.add(warmL);
+
+  const coolL=new THREE.PointLight(0x2d5a9e,2,20);
+  coolL.position.set(-4,2,-3);
+  scene.add(coolL);
+
+  const fireL=new THREE.PointLight(0xff4400,3,12);
+  fireL.position.set(1,-3,3);
+  scene.add(fireL);
+
+  const rimL=new THREE.PointLight(0xb87333,2,15);
+  rimL.position.set(-2,-1,2);
+  scene.add(rimL);
+
+  /* -- BOTTLE SHAPE (LatheGeometry) -- */
+  const pts=[
+    new THREE.Vector2(.0,.00),
+    new THREE.Vector2(.50,.00),
+    new THREE.Vector2(.55,.08),
+    new THREE.Vector2(.60,.3),
+    new THREE.Vector2(.64,.8),
+    new THREE.Vector2(.66,1.6),
+    new THREE.Vector2(.66,2.8),
+    new THREE.Vector2(.63,3.4),
+    new THREE.Vector2(.56,3.9),
+    new THREE.Vector2(.38,4.5),
+    new THREE.Vector2(.22,5.0),
+    new THREE.Vector2(.20,5.8),
+    new THREE.Vector2(.22,6.0),
+    new THREE.Vector2(.22,6.15),
+  ];
+
+  const bottleGroup=new THREE.Group();
+
+  /* Outer glass */
+  const glassGeo=new THREE.LatheGeometry(pts,96);
+  const glassMat=new THREE.MeshPhysicalMaterial({
+    color:0x0a0500,
+    roughness:.05,
+    metalness:.05,
+    reflectivity:.9,
+    clearcoat:1.0,
+    clearcoatRoughness:.02,
+    transparent:true,
+    opacity:.92,
+  });
+  const glass=new THREE.Mesh(glassGeo,glassMat);
+  bottleGroup.add(glass);
+
+  /* Inner liquid */
+  const liqPts=pts.map(p=>new THREE.Vector2(p.x*.85,p.y));
+  const liqGeo=new THREE.LatheGeometry(liqPts,64);
+  const liqMat=new THREE.MeshStandardMaterial({
+    color:0x7a3800,
+    roughness:.0,
+    metalness:.0,
+    transparent:true,
+    opacity:.85,
+    emissive:0x3d1800,
+    emissiveIntensity:.4,
+  });
+  bottleGroup.add(new THREE.Mesh(liqGeo,liqMat));
+
+  /* Label */
+  const lblCanvas=document.createElement('canvas');
+  lblCanvas.width=512;lblCanvas.height=220;
+  const lc=lblCanvas.getContext('2d');
+  lc.fillStyle='#0a0500';
+  lc.fillRect(0,0,512,220);
+  lc.strokeStyle='rgba(200,134,10,.4)';
+  lc.lineWidth=1;
+  lc.strokeRect(12,12,488,196);
+  lc.strokeRect(20,20,472,180);
+  lc.fillStyle='rgba(200,134,10,.06)';
+  lc.fillRect(20,20,472,180);
+  lc.fillStyle='#c8860a';
+  lc.font='bold 52px Georgia,serif';
+  lc.textAlign='center';
+  lc.letterSpacing='8px';
+  lc.fillText('SOLEM EXIRE',256,95);
+  lc.fillStyle='rgba(200,134,10,.5)';
+  lc.fillRect(80,110,352,1);
+  lc.fillStyle='rgba(200,134,10,.7)';
+  lc.font='16px Georgia,serif';
+  lc.fillText('BIÈRE ARTISANALE — 1689',256,140);
+  lc.fillStyle='rgba(200,134,10,.4)';
+  lc.font='12px Georgia,serif';
+  lc.fillText('6.8% ALC. VOL. · 750 ML',256,170);
+  const lblTex=new THREE.CanvasTexture(lblCanvas);
+  const lblGeo=new THREE.CylinderGeometry(.64,.64,1.2,64,1,true,-Math.PI*.7,Math.PI*1.4);
+  const lblMat=new THREE.MeshStandardMaterial({map:lblTex,transparent:true,roughness:.3,metalness:.1,side:THREE.FrontSide});
+  const lbl=new THREE.Mesh(lblGeo,lblMat);
+  lbl.position.y=1.5;
+  bottleGroup.add(lbl);
+
+  /* Cap */
+  const capGeo=new THREE.CylinderGeometry(.24,.22,.12,32);
+  const capMat=new THREE.MeshStandardMaterial({color:0xc8860a,roughness:.1,metalness:.8});
+  const cap=new THREE.Mesh(capGeo,capMat);
+  cap.position.y=6.21;
+  bottleGroup.add(cap);
+
+  /* Glow sphere behind bottle */
+  const glowGeo=new THREE.SphereGeometry(1.5,32,32);
+  const glowMat=new THREE.MeshBasicMaterial({color:0xc8860a,transparent:true,opacity:.04});
+  const glow=new THREE.Mesh(glowGeo,glowMat);
+  glow.position.set(0,3,-.5);
+  scene.add(glow);
+
+  bottleGroup.position.set(0,-3,0);
+  bottleGroup.rotation.y=.3;
+  scene.add(bottleGroup);
+
+  /* -- PARTICLES -- */
+  const pCount=600;
+  const pPos=new Float32Array(pCount*3);
+  for(let i=0;i<pCount;i++){
+    pPos[i*3]=(Math.random()-.5)*14;
+    pPos[i*3+1]=(Math.random()-.5)*14;
+    pPos[i*3+2]=(Math.random()-.5)*8;
+  }
+  const pGeo=new THREE.BufferGeometry();
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  const pMat=new THREE.PointsMaterial({color:0xc8860a,size:.03,transparent:true,opacity:.35});
+  const particles=new THREE.Points(pGeo,pMat);
+  scene.add(particles);
+
+  /* -- MOUSE PARALLAX -- */
+  let targetRX=0,targetRY=0;
+  document.addEventListener('mousemove',e=>{
+    const nx=(e.clientX/window.innerWidth-.5)*2;
+    const ny=(e.clientY/window.innerHeight-.5)*2;
+    targetRX=ny*.08;
+    targetRY=nx*.12;
+  });
+
+  /* -- GSAP BOTTLE INTRO -- */
+  gsap.from(bottleGroup.position,{y:-6,duration:2.5,ease:'power4.out',delay:.5});
+  gsap.from(bottleGroup.rotation,{y:-1,duration:2.5,ease:'power4.out',delay:.5});
+  gsap.to(bottleGroup,{duration:0}); // keep ref
+
+  /* -- SCROLL: fade canvas -- */
+  gsap.to('#threeCanvas',{
+    opacity:0,
+    scrollTrigger:{trigger:'#histoire',start:'top 80%',end:'top top',scrub:1}
+  });
+
+  /* -- RESIZE -- */
+  window.addEventListener('resize',()=>{
+    const nw=canvas.offsetWidth,nh=canvas.offsetHeight;
+    camera.aspect=nw/nh;camera.updateProjectionMatrix();
+    renderer.setSize(nw,nh);
+  });
+
+  /* -- LOOP -- */
+  const clock=new THREE.Clock();
+  (function loop(){
+    requestAnimationFrame(loop);
+    const t=clock.getElapsedTime();
+    bottleGroup.rotation.y+=.004;
+    bottleGroup.rotation.x+=(targetRX-bottleGroup.rotation.x)*.05;
+    particles.rotation.y+=.0004;
+    particles.rotation.x=Math.sin(t*.1)*.05;
+    warmL.intensity=3.5+Math.sin(t*1.5)*.5;
+    fireL.intensity=2.5+Math.sin(t*2.3+1)*.5;
+    glow.material.opacity=.03+Math.sin(t*.8)*.015;
+    renderer.render(scene,camera);
+  })();
+})();
+
+/* ============================================================
+   SCROLL REVEAL — IntersectionObserver
+============================================================ */
+const revealObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      setTimeout(()=>e.target.classList.add('visible'),
+        (parseFloat(e.target.style.transitionDelay)||0)*1000);
+      revealObs.unobserve(e.target);
+    }
+  });
+},{threshold:.15});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(el=>revealObs.observe(el));
+
+/* ============================================================
+   SIGNATURE ANIMATION
+============================================================ */
+ScrollTrigger.create({
+  trigger:'#signature',
+  start:'top 70%',
+  once:true,
+  onEnter:()=>{
+    const tl=gsap.timeline();
+    tl.to('#sigLineT,#sigLineB',{opacity:1,duration:1,ease:'power2.out'})
+      .to('#sigEye',{opacity:1,duration:.8,ease:'power3.out'},'-=.5')
+      .to('#sigTitle .word span',{y:0,duration:1.2,stagger:.12,ease:'power4.out'},'-=.3')
+      .to('#sigDesc',{opacity:1,duration:.8,ease:'power3.out'},'-=.4')
+      .to('#sigBtn',{opacity:1,duration:.8,ease:'power3.out'},'-=.3');
+  }
+});
+
+/* ============================================================
+   GSAP HISTOIRE PARALLAX
+============================================================ */
+gsap.to('.histoire-year',{
+  y:-60,
+  scrollTrigger:{trigger:'#histoire',start:'top bottom',end:'bottom top',scrub:2}
+});
+
+/* ============================================================
+   CARDS STAGGER
+============================================================ */
+ScrollTrigger.create({
+  trigger:'.biere-cards',
+  start:'top 80%',
+  once:true,
+  onEnter:()=>{
+    gsap.from('.biere-card',{
+      y:60,opacity:0,duration:1,stagger:.15,ease:'power3.out'
+    });
+  }
+});
+
+/* ============================================================
+   GALLERY REVEAL
+============================================================ */
+ScrollTrigger.create({
+  trigger:'.gallery-grid',
+  start:'top 80%',
+  once:true,
+  onEnter:()=>{
+    gsap.from('.g-item',{
+      y:40,opacity:0,duration:1,stagger:.08,ease:'power3.out'
+    });
+  }
+});
+</script>
+</body>
+</html>
